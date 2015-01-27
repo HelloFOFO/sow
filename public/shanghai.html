@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>上海教育地图a</title>
+    <script src="http://api.map.baidu.com/api?v=2.0&ak=KIIdahCOvEoytBiuSNKeBUKW"></script>
+    <script src="./js/infobox_min.js"></script>
+    <script src="./js/jquery-1.11.1.min.js"></script>
+    <link rel="stylesheet" href="./css/sow.css">
+</head>
+<body>
+
+<div style="width: 100%;">
+    <div style="float:left; width:60%; border: 0px solid red; height: auto; min-height: 800px;" id="map">
+
+    </div>
+
+    <div style="float:left; width:15%; border: 0px solid blue; height: auto; min-height: 700px;">
+        <span>
+            上海市
+        </span>
+    </div>
+
+    <div style="clear: both;"></div>
+
+</div>
+
+
+<script>
+
+    var mapData = {
+        cityname:"shanghai",
+        cityname_cn:"上海市",
+//        regionlist:["黄浦区-blue"],
+//        regionList:["黄浦区-#C8C1E3","卢湾区-#C8C1E3","徐汇区-#FBC5DC","长宁区-#DBEDC7","静安区-#E7CCAF","普陀区-#C8C1E3","闸北区-#FBC5DC","虹口区-#C8C1E3","杨浦区-#DBECC8","宝山区-#E7CCAF","闵行区-#FCFBBB","嘉定区-#FCFBBB","浦东新区-#FCFBBB","松江区-#FBC5DC","金山区-#FCFBBB","青浦区-#E7CCAF","奉贤区-#E7CCAF"],
+        regionList:[
+            {
+                regionName:"杨浦区",
+                regionBorderColor:"#DBECC8",
+                center:[121.521632,31.306238],
+                cntXiaoxue:10,
+                cntZhongxue:20,
+                cntXiaoqu:120
+            },
+            {
+                regionName:"黄浦区",
+                regionBorderColor:"#C8C1E3",
+                center:[121.48134,31.238936],
+                cntXiaoxue:10,
+                cntZhongxue:20,
+                cntXiaoqu:120
+            }
+            ,
+            {
+                regionName:"宝山区",
+                regionBorderColor:"#E7CCAF",
+                center:[121.419389,31.31413],
+                cntXiaoxue:10,
+                cntZhongxue:20,
+                cntXiaoqu:120
+            }
+        ],
+        center:{x:121.487899,y:31.249162}
+    };
+
+    var styleJSON = [
+        {
+            "featureType": "water",
+            "elementType": "all",
+            "stylers": {
+                "visibility": "off"
+            }
+        },
+        {
+            "featureType": "building",
+            "elementType": "all",
+            "stylers": {
+                "visibility": "off"
+            }
+        },
+        {
+            "featureType": "manmade",
+            "elementType": "all",
+            "stylers": {
+                "visibility": "off"
+            }
+        },
+        {
+            "featureType": "highway",
+            "elementType": "all",
+            "stylers": {
+                "visibility": "off"
+            }
+        },
+        {
+            "featureType": "arterial",
+            "elementType": "all",
+            "stylers": {
+                "visibility": "off"
+            }
+        },
+        {
+            "featureType": "local",
+            "elementType": "all",
+            "stylers": {
+                "visibility": "off"
+            }
+        },
+        {
+            "featureType": "railway",
+            "elementType": "all",
+            "stylers": {
+                "visibility": "off"
+            }
+        },
+        {
+            "featureType": "building",
+            "elementType": "all",
+            "stylers": {
+                "color": "#ff0000",
+                "visibility": "off"
+            }
+        },
+//        {
+//            "featureType": "subway",
+//            "elementType": "geometry.fill",
+//            "stylers": {
+//                "color": "#cccccc",
+//                "visibility": "on"
+//            }
+//        },
+        {
+            "featureType": "label",
+            "elementType": "labels",
+            "stylers": {
+                "visibility": "on"
+            }
+        }
+    ]
+
+    function initialize() {
+        var map = new BMap.Map('map');
+        map.centerAndZoom(new BMap.Point(mapData.center.x, mapData.center.y), 12);
+        map.setMapStyle({styleJson:styleJSON});
+        map.enableScrollWheelZoom(); //启用鼠标缩放
+
+        var infoBox;
+
+        //添加行政区边界
+        $.each(mapData.regionList,function(index,region){
+            var regionName = region.regionName;
+            var regionColor = region.regionBorderColor;
+//        alert("region no " + index+ " is " +regionName);
+
+            //提示窗口的属性
+            var opts = {
+                width : 250,     // 信息窗口宽度
+                height: 80,     // 信息窗口高度
+                cursor:"pointer",
+                enableMessage:false//设置允许信息窗发送短息
+            };
+
+
+            // 画多边形行政区域
+            var bound = new BMap.Boundary();
+            bound.get(regionName,function(rs){
+                for(var i=0;i<rs.boundaries.length;i++){
+                var polygon = new BMap.Polygon(rs.boundaries[i]);
+                polygon.setStrokeColor(regionColor);
+                polygon.setStrokeOpacity(1);
+                polygon.setStrokeWeight(1);
+                polygon.setFillColor(regionColor);
+                polygon.setFillOpacity(0.5);
+
+                //为各个区添加信息窗口，提示这个区的统计数据
+                //比如： 小区数、中小学数量
+                map.addOverlay(polygon);
+                    polygon.addEventListener("click",function(e){
+
+                        //信息窗口的中心设置为区的中心点（自己给的）
+                        var point = new BMap.Point(region.center[0],region.center[1]);
+
+                        /*
+                        //设置信息窗口的标题为“区名”
+                        opts.title = region.regionName;
+                        //信息窗口的内容
+                        var infoDetail = "小学："+region.cntXiaoxue+"&nbsp;&nbsp;所<br>"
+                        infoDetail += "中学："+region.cntXiaoxue+"&nbsp;&nbsp;所<br>"
+                        infoDetail += "小区："+region.cntXiaoxue+"&nbsp;&nbsp;个"
+                        var infoWindow = new BMap.InfoWindow(infoDetail,opts);
+                        map.openInfoWindow(infoWindow,point);
+                        */
+
+                        if(infoBox){
+                            infoBox.close();
+                        }
+
+                        //改用infobox试试
+                        var html = ["<div class='infoBoxContent'><div class='title'><strong>"+region.regionName+"</strong></div>"
+                        ,"<div class='list'><span>小学："+region.cntXiaoxue+ "&nbsp;&nbsp;所</span></div>"
+                        ,"<div class='list'><span>中学："+region.cntZhongxue+ "&nbsp;&nbsp;所</span></div>"
+                        ,"<div class='list'><span>小区："+region.cntXiaoqu+ "&nbsp;&nbsp;个</span></div>"
+                        ,"</div>"];
+
+                        infoBox = new BMapLib.InfoBox(map,html.join(""),{
+                            boxStyle:{
+                                width: "170px"
+                                ,height: "auto"
+                                ,border:"0px solid #4FA5FC"
+//                                ,background_color:"#cccccc"
+                                ,border_radius:"5px"
+                            }
+                            ,closeIconMargin: "1px 1px 0 0"
+                            ,enableAutoPan: true
+                            ,align: INFOBOX_AT_TOP
+
+                        });
+
+                        //alert(infoBox);
+                        infoBox.open(point);
+
+                        });
+
+
+                }
+            });
+
+
+        });
+    }
+
+    $(document).ready(initialize);
+</script>
+
+
+</body>
+</html>
