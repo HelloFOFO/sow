@@ -4,9 +4,15 @@
 var express = require("express");
 var router = express.Router();
 
-var indexAction = require("./../action/indexAction");
+var mapAction = require("./../action/mapAction");
 
-router.get("/map/:cityname",indexAction.cityMap);
+
+router.all("/*",function(req,res,next){
+    res.charset="utf-8";
+    next();
+});
+
+router.get("/map/:cityname",mapAction.cityMap);
 
 
 module.exports = router;
