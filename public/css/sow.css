@@ -5,12 +5,41 @@ body{
 .div_base{width: 100%; margin-left: auto;margin-right: auto; text-align: center;  margin-top: 0px;border:0px solid green;}
 
 .infoBoxContent{font-size:12px; font-family: "microsoft yahei in-bold";width: 170px}
-
 .infoBoxContent .title{height:25px;width:167px; background-color: #cccccc; border: 1px solid #4FA5FC;}
 .infoBoxContent .title strong{font-size:14px;line-height:25px;padding:0 10px 0 5px;}
-
 .infoBoxContent .list{width:162px;border:solid 1px #4FA5FC;border-top:none;background:#fff; height: 25px; line-height: 25px; padding-left: 5px;}
-
 .infoBoxContent a{color:#0041D9;text-decoration:none;}
 
+.div_title{background-color: #ddd; text-align: left;height: 30px; line-height: 30px; font-size: 16px; }
 
+
+.div_school_comm_matched_item{width: 650px; border-bottom:1px dotted #cccccc;height: 40px; line-height: 40px; cursor:pointer;}
+.div_school_comm_matched_item:hover,.div_school_comm_matched_item_hover{background-color:#FB812B}
+.div_school_comm_matched_item_comm_name{width:200px;float: left;font-weight: bold; font-size: 16px; color: #05a;}
+.div_school_comm_matched_item_comm_dt{width:100px;float: left;font-size:12px;color:#c0c0c0;}
+.div_school_comm_matched_item_comm_address{width:250px;float: left;font-size:12px;color:#c0c0c0;}
+.div_school_comm_matched_item_feedback{width:60px;float: left;font-size:13px;color:red;}
+
+
+.div_map_comm{}
+
+.overlay_autowidth{width: auto;white-space:nowrap;}
+.overlay_school{font-weight: bold;color: #FF911F;border: 1px solid #FF911F;border-radius: 5px;filter:alpha(opacity=0);}
+.overlay_circle{position:absolute;border-radius: 50%;background: url("/img/bg_polymer.png") 0 0 no-repeat;width: 70px;height: 70px;text-align:center;display: table;}
+.overlay_circle:hover,.overlay_circle_hover{background-position: -85px;}
+.overlay_circle_content{font-size:12px;vertical-align: middle;display: table-cell;font-weight: bold;word-wrap: break-word;word-break: break-all;color:#fff;}
+
+
+.div_comm_detail{width:650px;background-color: #cccccc;}
+
+
+/* 渐变色 */
+.div_fuck_wc {
+    FILTER: progid:DXImageTransform.Microsoft.Gradient(gradientType=0,startColorStr=#b8c4cb,endColorStr=red); /*IE 6 7 8*/
+    background: -ms-linear-gradient(top, #fff,  #0000ff);        /* IE 10 */
+    background:-moz-linear-gradient(top,#b8c4cb,#f6f6f8);/*火狐*/
+    background:-webkit-gradient(linear, 0% 0%, 0% 100%,from(#b8c4cb), to(#f6f6f8));/*谷歌*/
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fff), to(#0000ff));      /* Safari 4-5, Chrome 1-9*/
+    background: -webkit-linear-gradient(top, #fff, #0000ff);   /*Safari5.1 Chrome 10+*/
+    background: -o-linear-gradient(top, #fff, #0000ff);  /*Opera 11.10+*/
+}

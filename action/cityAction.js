@@ -1,12 +1,11 @@
 /**
- * Created by zhisongli on 15-1-4.
+ * Created by zhisongli on 15-3-19.
  */
-
 var cityService = require("./../service/cityService.js");
 var commService = require("./../service/commService.js");
 var schoolService = require("./../service/schoolService.js");
 
-exports.cityMap = function(req,res){
+exports.cityHome = function(req,res){
     var city_name = req.params.cityname;
     // 取城市的基本信息
     cityService.getCityInfoByName(city_name,function(err,city){
@@ -131,8 +130,6 @@ exports.cityMap = function(req,res){
                     });
                 }
             );
-
-
             async.parallel(topFuncList,function(err,result){
                 console.log("data here is :");
                 console.log(data);
@@ -142,7 +139,4 @@ exports.cityMap = function(req,res){
 
         }
     });
-
 }
-
-

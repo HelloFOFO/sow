@@ -1,0 +1,219 @@
+<% include frmheader.ejs %>
+
+<div id="div_content" class="div_base" style="margin-left: 50px;width:auto;">
+    <div id="div_school_title" data-detail='<%- JSON.stringify(data)%>' style="font-size: 14px; font-weight: bold;" class="div_title">
+        <!-- 这个地方默认写死到上海，回头需要改掉-->
+        <a href="/city/shanghai"><%- data.city_name%></a> -- <%- data.region_name%>区 -- <%- data.name_chs%>
+    </div>
+    <div id="div_info" style="float:left;width:800px;border-right:solid #e0e0e0 1px;">
+        <div id="div_school_map" style="border:0px solid red;height: 600px;width: 800px;">
+        </div>
+    </div>
+    <div id="div_right" style="float:left; width: 680px; margin-left: 5px;  border:solid blue 0px; text-align: left;">
+        <div id="div_menu" style="margin-top: 5px;">
+            <ul class="nav nav-tabs">
+                <li role="presentation" class="active"><a href="#" onclick="menuclick('house',this);">对口小区</a></li>
+                <li role="presentation"><a href="#" onclick="menuclick('detail',this)">学校详情</a></li>
+                <li role="presentation"><a href="#" onclick="menuclick('comment',this)">信息交流</a></li>
+            </ul>
+        </div>
+        <div id="div_school_house">
+            <div id="div_school_comm_match">
+                <div id="div_school_comm_matched_detail" style="margin-left: 15px;">
+                    <div id="div_school_comm_matched_list" class="">
+                    </div>
+                </div>
+                <div style="clear: both;"></div>
+                <div class="input-group input-group-sm" style="width:200px;margin-left: 15px; margin-top: 10px;">
+                    <input type="text" class="form-control" placeholder="我要补充对口小区">
+                        <span class="input-group-btn">
+                        <button class="btn btn-default" type="button">补充一个</button>
+                        </span>
+                </div><!-- /input-group -->
+            </div>
+        </div>
+
+        <div id="div_school_detail" style="display: none;">
+            <div class="div_title" style="width:80px; text-align: center;font-size: 14px; font-weight: bold;margin-top:10px;">学校简介</div>
+            <div id="div_school_desc"></div>
+            <div class="div_title" style="width:80px; text-align: center;font-size: 14px; font-weight: bold;margin-top:20px;">招生简章</div>
+            <div id="div_school_enroll_guide"></div>
+            <div class="div_title" style="width:80px; text-align: center;font-size: 14px; font-weight: bold;margin-top:20px;">学校数据</div>
+            <div id="div_school_data"></div>
+        </div>
+
+        <div id="div_school_comment" style="display: none;">
+            评论
+        </div>
+    </div>
+
+    <%include frmright.ejs%>
+</div>
+
+<div style="clear:both;"></div>
+
+<!--<div style="width:100%; border:1px red solid;">-->
+    <!--<div class="div_fuck_wc" style="width:32px;height:30px; float:left;">a</div>-->
+    <!--<div style="width:auto; height:30px;float:left;">b</div>-->
+    <!--<div class="div_fuck_wc" style="width:32px; height:30px;float:right;">c</div>-->
+    <!--<div style="clear: both;"></div>-->
+<!--</div>-->
+
+<script src="/js/public.js"></script>
+<script>
+    function menuclick(content,obj){
+        $("#div_menu  li").removeClass("active");
+        $("#div_school_house").hide();
+        $("#div_school_detail").hide();
+        $("#div_school_comment").hide();
+        $("#div_school_"+content).show();
+        $(obj).parent().addClass("active");
+    }
+
+    var cData = {
+        "commInfo":{},
+        "schoolInfo":{}
+    };
+
+    function eventCommSelected(e){
+        var comm_id = $(this).data("matchinfo").comm_id;
+
+        //公共处理
+        $(".div_comm_detail").remove();
+
+        $(".overlay_circle_hover").removeClass("overlay_circle_hover");
+
+        $("#div_map_comm_"+comm_id).addClass("overlay_circle_hover");
+
+
+        if(cData.commInfo[comm_id]){
+            //alert(JSON.stringify(cData.commInfo[comm_id]));
+
+            var html = "<div class='div_comm_detail'>" +
+                    "<span>小区均价:</span>" +cData.commInfo[comm_id].avg_price+"元"+
+                    "<span>房源数量:</span>" +cData.commInfo[comm_id].cnt_house_ajk+"套"+
+                    "</div>";
+            $("#div_list_comm_"+comm_id).after(html);
+
+        }
+        else{
+//            alert("need to get comm info");
+            // 这儿可以考虑加一个提示信息--获取信息ing
+            $.ajax(
+                    {
+                        url: "/comm/get/comminfo/"+comm_id,
+                        method: "get"
+                    }
+            ).done(
+                function(data){
+                    // 数据缓存一下先
+                    cData.commInfo[comm_id] = data;
+
+                    var html = "<div class='div_comm_detail'>" +
+                            "<span>小区均价:</span>" +cData.commInfo[comm_id].avg_price+"元"+
+                            "<span>房源数量:</span>" +cData.commInfo[comm_id].cnt_house_ajk+"套"+
+                            "</div>";
+                    $("#div_list_comm_"+comm_id).after(html);
+                }
+            );
+        }
+
+    }
+
+    function initMe(){
+        // 初始化地图
+        var schoolInfo = $("#div_school_title").data("detail");
+        var pos_baidu = schoolInfo.pos_baidu.split(",");
+        var map = new BMap.Map('div_school_map');
+        var point = new BMap.Point(pos_baidu[0],pos_baidu[1])
+        map.centerAndZoom( point,16);
+        map.enableScrollWheelZoom(); //启用鼠标缩放
+
+        var marker = new BMap.Marker(point);// 创建标注点
+        map.addOverlay(marker);
+        marker.setAnimation(BMAP_ANIMATION_DROP); //标注点跳起来
+
+//        var divOverlaySchool = "<div id='div_map_school_"+schoolInfo.school_id+"' class='div_map_school' style='position:absolute;width: 250px;'>" +
+//                "<div style='width:15px;float:left;background-color: #FF911F;border: 1px solid #FF911F;'><span class='glyphicon glyphicon-map-marker'></span></div>" +
+//                "<div style='width:auto;float:left;font-weight: bold;color: #FF911F;border: 1px solid #FF911F;border-bottom-right-radius: 5px;border-top-right-radius: 5px;padding-left: 5px;padding-right: 5px;filter:alpha(opacity=0);'>"+schoolInfo.name_chs+"</div>" +
+//                "<div style='clear:both;'></div><div>";
+
+        var divOverlaySchool = "<div id='div_map_school_"+schoolInfo.school_id+"' class='overlay_autowidth overlay_school'>" +schoolInfo.name_chs+"</div>";
+        var richMarkerSchool = new BMapLib.RichMarker(divOverlaySchool,point);
+        map.addOverlay(richMarkerSchool);
+
+
+        // 获取对口小区列表
+        $.ajax(
+                {
+                    url: "/school/get/matchedcomm/"+schoolInfo.school_id,
+                    method: "get"
+                }
+        ).done(
+                function (data) {
+                    // 返回的结果是根据年进行聚合的，这儿先显示最近一年
+                    if(data && data.matchResult && data.matchResult.length > 0){
+                        var resultHTML;
+                        var result = data.matchResult[0];
+//                        alert(JSON.stringify(result));
+                        for(var i=0;i< result.matchedComms.length;i++){
+                            //  divData放到div里面
+                            var divData = {"match_id":result.matchedComms[i].match_id
+                                           ,"school_id":result.matchedComms[i].school_id
+                                           ,"comm_id":result.matchedComms[i].comm_id
+                                           };
+
+                            //添加右边列表的东西
+                            resultHTML = "<div id='div_list_comm_"+result.matchedComms[i].comm_id+"' data-matchinfo='"+JSON.stringify(divData)+"' class='div_school_comm_matched_item'>"
+                                    + "<div class='div_school_comm_matched_item_comm_name'>"+result.matchedComms[i].name_chs_c+"</div>"
+                                    + "<div class='div_school_comm_matched_item_comm_dt'><span class='glyphicon glyphicon-home'></span>&nbsp"+result.matchedComms[i].built_date_c+"</div>"
+                                    + "<div class='div_school_comm_matched_item_comm_address'><span class='glyphicon glyphicon-map-marker'></span>&nbsp;"+result.matchedComms[i].address_c+"</div>"
+                                    + "<div class='div_school_comm_matched_item_feedback'>"
+                                    + ""
+                                    + "<div>"
+                                    + "<div style='clear: both;'></div>"
+                                    + "</div>";
+                            $("#div_school_comm_matched_list").append(resultHTML);
+
+//                            var divOverlayComm = "<div id='div_map_comm_"+result.matchedComms[i].comm_id+"' data-matchinfo='"+JSON.stringify(divData)+"' class='div_map_school' style='position: absolute;width: 250px;'>" +
+//                                    "<div style='width:15px;float:left;background-color: #FF911F;border: 1px solid #FF911F;'><span class='glyphicon glyphicon-home'></span></div>" +
+//                                    "<div style='width:auto;background-color:#fff;float:left;font-weight: bold;color: #05a;border: 1px solid #FF911F; border-bottom-right-radius: 5px;border-top-right-radius: 5px;padding-left: 5px; padding-right: 5px; white-space:nowrap;'>"+result.matchedComms[i].name_chs_c+"</div>" +
+//                                    "</div>";
+
+                            // 小区用圆形点
+                            var divOverlayComm2 = "<div id='div_map_comm_"+result.matchedComms[i].comm_id+"' data-matchinfo='"+JSON.stringify(divData)+"' class='overlay_circle'>" +
+                                    "<div class='overlay_circle_content'>"+result.matchedComms[i].name_chs_c+"</div>"+
+                                    "</div>";
+
+                            // 圆形覆盖物的中心点需要计算一下；
+                            var pos_baidu_c = result.matchedComms[i].pos_baidu_c.split(",");
+                            var pointComm = new BMap.Point(pos_baidu_c[0],pos_baidu_c[1]);
+                            var pixelComm = map.pointToPixel(pointComm);
+                            var newPixelComm = new BMap.Pixel(pixelComm.x-35,pixelComm.y-35);   //设置圆形的覆盖物的坐标，圆的直径是70，这里减去一半即可
+                            var newPointComm = map.pixelToPoint(newPixelComm);
+
+                            //圆形覆盖物
+                            var richMarkerComm = new BMapLib.RichMarker(divOverlayComm2,newPointComm);
+                            map.addOverlay(richMarkerComm);
+
+                            //填加点击事件
+                            $("#div_map_comm_"+result.matchedComms[i].comm_id).mouseover(eventCommSelected);
+                            $("#div_list_comm_"+result.matchedComms[i].comm_id).mouseover(eventCommSelected);
+
+
+                            //如果有点不在当前屏幕范围的，缩小地图的缩放比例（可以出个提示也行）
+                        }
+                    }
+                }
+        );
+
+        //设置标题
+        $(document).attr("title",schoolInfo.name_chs + "-"+ schoolInfo.subregion_name + "-" +schoolInfo.region_name+"区");
+
+    }
+
+
+    $(document).ready(initMe);
+</script>
+
+<% include frmfooter.ejs %>
