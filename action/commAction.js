@@ -4,6 +4,38 @@
 
 var async = require("async");
 var commService = require("./../service/commService");
+var schoolService = require("./../service/schoolService");
+
+
+exports.getMatchedSchoolListById = function(req,res){
+    var id = parseInt(req.params.id);
+    if(isNaN(id)){
+        res.json({});
+    }
+    else{
+        /*
+         * 最后返回的对象格式
+         * {matchedSchool:
+         * [
+         * {
+         * match_id:
+         * match_year:
+         * match_scope:
+         * school_id:
+         * school_name:
+         * ...
+         * }...
+         * ]
+         * }
+         * */
+
+        // 这里把学校信息补全，不要到客户端再去补一次了；
+        commService.getMatchedSchoolListById(id,function(err,result){
+
+            }
+        );
+    }
+}
 
 exports.getCommInfoById = function(req,res){
     var id = parseInt(req.params.id);
@@ -19,7 +51,7 @@ exports.getCommInfoById = function(req,res){
             var data = {};
             if(result[0]){
                 data.comm_id          = result[0].comm_id           ;
-                data.subregion_id   = result[0].nsubregion_id     ;
+                data.subregion_id    = result[0].nsubregion_id     ;
                 data.subregion_name  = result[0].subregion_name    ;
                 data.region_id        = result[0].region_id         ;
                 data.region_name      = result[0].region_name       ;

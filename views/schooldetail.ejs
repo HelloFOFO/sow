@@ -71,8 +71,8 @@
     }
 
     var cData = {
-        "commInfo":{},
-        "schoolInfo":{}
+        "commInfo":{},                      // 小区ID为主键，对应的小区基本属性
+        "matchedSchoolInfo":{}            // 小区ID为主键，对应的学校ID列表
     };
 
     function eventCommSelected(e){
@@ -82,22 +82,17 @@
         $(".div_comm_detail").remove();
 
         $(".overlay_circle_hover").removeClass("overlay_circle_hover");
+        $(".div_school_comm_matched_item_hover").removeClass("div_school_comm_matched_item_hover");
 
         $("#div_map_comm_"+comm_id).addClass("overlay_circle_hover");
+        $("#div_list_comm_"+comm_id).addClass("div_school_comm_matched_item_hover");
 
-
+        //如果小区信息已经获取过了，直接展示
         if(cData.commInfo[comm_id]){
-            //alert(JSON.stringify(cData.commInfo[comm_id]));
-
-            var html = "<div class='div_comm_detail'>" +
-                    "<span>小区均价:</span>" +cData.commInfo[comm_id].avg_price+"元"+
-                    "<span>房源数量:</span>" +cData.commInfo[comm_id].cnt_house_ajk+"套"+
-                    "</div>";
-            $("#div_list_comm_"+comm_id).after(html);
-
+            showCommDetail(comm_id,cData.commInfo[comm_id]);
         }
         else{
-//            alert("need to get comm info");
+            // 获取小区基本信息
             // 这儿可以考虑加一个提示信息--获取信息ing
             $.ajax(
                     {
@@ -109,14 +104,44 @@
                     // 数据缓存一下先
                     cData.commInfo[comm_id] = data;
 
-                    var html = "<div class='div_comm_detail'>" +
-                            "<span>小区均价:</span>" +cData.commInfo[comm_id].avg_price+"元"+
-                            "<span>房源数量:</span>" +cData.commInfo[comm_id].cnt_house_ajk+"套"+
-                            "</div>";
-                    $("#div_list_comm_"+comm_id).after(html);
+                    showCommDetail(comm_id,cData.commInfo[comm_id]);
                 }
             );
         }
+
+        // 小区对口的学校信息已经获取过了，直接展示
+        // 要先判断下当前的学校是什么类型的，如果当前学校是小学，那么取小区对口的幼儿园即可；
+        if(cData.matchedSchoolInfo[comm_id]){
+            showMatchedSchoolInfo(comm_id,cData.matchedSchoolInfo[comm_id]);
+        }
+        else{
+            $.ajax(
+                    {
+                        url: "/comm/get/matchedschoolinfo/"+comm_id,
+                        method: "get"
+                    }
+            ).done(
+                    function(data){
+                        // 数据缓存一下先
+                        cData.matchedSchoolInfo[comm_id] = data;
+
+                        showMatchedSchoolInfo(comm_id,cData.matchedSchoolInfo[comm_id]);
+                    }
+            );
+        }
+    }
+
+    function showCommDetail(comm_id,data){
+        var html = "<div class='div_comm_detail'>" +
+                "<div>小区名称:</span>" +data.name_chs+"</div>"+
+                "<div>小区地址:</span>" +data.address+"</div>"+
+                "<div>小区均价:</span>" +data.avg_price+"元</div>"+
+                "<div>房源数量:</span>" +data.cnt_house_ajk+"套</div>"+
+                "</div>";
+        $("#div_list_comm_"+comm_id).after(html);
+    }
+
+    function showMatchedSchoolInfo(comm_id,data){
 
     }
 
@@ -167,7 +192,7 @@
                             resultHTML = "<div id='div_list_comm_"+result.matchedComms[i].comm_id+"' data-matchinfo='"+JSON.stringify(divData)+"' class='div_school_comm_matched_item'>"
                                     + "<div class='div_school_comm_matched_item_comm_name'>"+result.matchedComms[i].name_chs_c+"</div>"
                                     + "<div class='div_school_comm_matched_item_comm_dt'><span class='glyphicon glyphicon-home'></span>&nbsp"+result.matchedComms[i].built_date_c+"</div>"
-                                    + "<div class='div_school_comm_matched_item_comm_address'><span class='glyphicon glyphicon-map-marker'></span>&nbsp;"+result.matchedComms[i].address_c+"</div>"
+                                    + "<div class='div_school_comm_matched_item_comm_address'><span class='glyphicon glyphicon-map-marker'></span>&nbsp;"+(result.matchedComms[i].address_c.length>20?result.matchedComms[i].address_c.substr(1,20)+"...":result.matchedComms[i].address_c)+"</div>"
                                     + "<div class='div_school_comm_matched_item_feedback'>"
                                     + ""
                                     + "<div>"
@@ -197,8 +222,8 @@
                             map.addOverlay(richMarkerComm);
 
                             //填加点击事件
-                            $("#div_map_comm_"+result.matchedComms[i].comm_id).mouseover(eventCommSelected);
-                            $("#div_list_comm_"+result.matchedComms[i].comm_id).mouseover(eventCommSelected);
+                            $("#div_map_comm_"+result.matchedComms[i].comm_id).click(eventCommSelected);
+                            $("#div_list_comm_"+result.matchedComms[i].comm_id).click(eventCommSelected);
 
 
                             //如果有点不在当前屏幕范围的，缩小地图的缩放比例（可以出个提示也行）

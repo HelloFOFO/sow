@@ -3,7 +3,7 @@
     <envs>
       <env name="DEBUG" value="sow" />
     </envs>
-    <browser start="true" url="http://localhost:3000/school/view/52" />
+    <browser start="true" url="http://localhost:3000/city/shanghai" />
     <RunnerSettings RunnerId="NodeJS.debug" />
     <RunnerSettings RunnerId="NodeJS.run" />
     <ConfigurationWrapper RunnerId="NodeJS.debug" />

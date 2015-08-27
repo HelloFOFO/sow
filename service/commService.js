@@ -58,3 +58,30 @@ exports.getCommExtendInfoById = function(comm_id,cb){
         cb({errorCode: e.code,errorMessage : e.message},{})
     }
 }
+
+exports.getMatchedSchoolListById = function(comm_id,cb){
+    try{
+        var conn = mysql.createConnection(conf.mysqlconn);
+        conn.connect(function(err){
+            if(err){
+                cb({errorCode:err.code,errorMessage: err.message},[]);
+            }
+        });
+
+        var sql = "SELECT match_id,comm_id,school_id,match_year,match_scope FROM school_comm_match WHERE comm_id = ?" ;
+        var query = conn.query(sql,[comm_id],function(err,rows){
+            if(err){
+                cb({errorCode:err.code,errorMessage: err.message},[]);
+            }
+            else{
+                cb(null,rows);
+            }
+        });
+        console.log("query of getMatchedSchoolListById here is :")
+        console.log(query.sql);
+        conn.end();
+    }
+    catch(e){
+        cb({errorCode: e.code,errorMessage : e.message},[])
+    }
+}

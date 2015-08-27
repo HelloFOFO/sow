@@ -173,13 +173,14 @@
                     polygon.setStrokeColor(regionColor);
                     polygon.setStrokeOpacity(1);
                     polygon.setStrokeWeight(1);
+
                     polygon.setFillColor(regionColor);
                     polygon.setFillOpacity(0.5);
 
                     //为各个区添加信息窗口，提示这个区的统计数据
                     //比如： 小区数、中小学数量
                     map.addOverlay(polygon);
-                    polygon.addEventListener("mouseover",function(e){
+                    polygon.addEventListener("click",function(e){
 
                         var center = region.pos_baidu.split(",");
                         //信息窗口的中心设置为区的中心点（自己给的）
@@ -191,9 +192,16 @@
 
                         //改用infobox试试
                         var html = ["<div class='infoBoxContent'><div class='title'><strong>"+region.name_chs+"</strong></div>"
-//                            ,"<div class='list'><span>小学："+region.cntXiaoxue+ "&nbsp;&nbsp;所</span></div>"
-//                            ,"<div class='list'><span>中学："+region.cntZhongxue+ "&nbsp;&nbsp;所</span></div>"
-//                            ,"<div class='list'><span>小区："+region.cntXiaoqu+ "&nbsp;&nbsp;个</span></div>"
+
+                            ,"<div class='list'><span class='school_type'>幼儿园：</span><span class='school_quantity'>"
+                                    +"<a href=/city/"+region.city_id+"/region/"+region.name_py+"/schools/youeryuan>"+region.cnt_youeryuan+"</a>"
+                                    +"</span><span class='school_unit'>所</span></div>"
+                            ,"<div class='list'><span class='school_type'>小学：</span><span class='school_quantity'>"
+                                    +"<a href=/city/"+region.city_id+"/region/"+region.name_py+"/schools/xiaoxue>"+region.cnt_xiaoxue+"</a>"
+                                    +"</span><span class='school_unit'>所</span></div>"
+                            ,"<div class='list'><span class='school_type'>初中：</span><span class='school_quantity'>"
+                                    +"<a href=/city/"+region.city_id+"/region/"+region.name_py+"/schools/chuzhong>"+region.cnt_chuzhong+"</a>"
+                                    +"</span><span class='school_unit'>所</span></div>"
                             ,"</div>"];
 
                         infoBox = new BMapLib.InfoBox(map,html.join(""),{

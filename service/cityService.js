@@ -13,7 +13,7 @@ exports.getRegionList = function(city_id,cb){
             }
         });
 
-        var sql = "SELECT region_id,city_id,name_py,name_chs,bg_color,pos_baidu FROM region WHERE city_id = ? ORDER BY name_py" ;
+        var sql = "SELECT r.region_id,r.city_id,r.name_py,r.name_chs,r.bg_color,r.pos_baidu,re.cnt_comm,re.cnt_youeryuan,re.cnt_xiaoxue,re.cnt_chuzhong,re.cnt_gaozhong FROM region r INNER JOIN region_extend re ON r.region_id=re.region_id WHERE r.city_id = ? ORDER BY r.name_py" ;
         var query = conn.query(sql,[city_id],function(err,rows){
             if(err){
                 cb({errorCode:err.code,errorMessage: err.message},{});
